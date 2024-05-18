@@ -1,0 +1,113 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TicTacToe extends JFrame implements ActionListener {
+    private JButton[] buttons = new JButton[9];
+    private char currentPlayer = 'X';
+    private JLabel statusLabel;
+
+    public TicTacToe() {
+        setTitle("Tic Tac Toe");
+        setSize(400, 400);
+        setLayout(new BorderLayout());
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        // Status panel
+        JPanel statusPanel = new JPanel();
+        statusLabel = new JLabel("Player X's turn");
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        statusPanel.add(statusLabel);
+        add(statusPanel, BorderLayout.NORTH);
+
+        // Board panel
+        JPanel boardPanel = new JPanel();
+        boardPanel.setLayout(new GridLayout(3, 3));
+        for (int i = 0; i < 9; i++) {
+            buttons[i] = new JButton("");
+            buttons[i].setFont(new Font("Arial", Font.PLAIN, 40));
+            buttons[i].setFocusPainted(false);
+            buttons[i].addActionListener(this);
+            boardPanel.add(buttons[i]);
+        }
+        add(boardPanel, BorderLayout.CENTER);
+
+        // Reset button
+        JButton resetButton = new JButton("Reset");
+        resetButton.setFont(new Font("Arial", Font.BOLD, 16));
+        resetButton.setBackground(new Color(92, 184, 92));
+        resetButton.setForeground(Color.WHITE);
+        resetButton.setFocusPainted(false);
+        resetButton.addActionListener(e -> resetGame());
+        add(resetButton, BorderLayout.SOUTH);
+
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JButton buttonClicked = (JButton) e.getSource();
+
+        if (buttonClicked.getText().equals("")) {
+            buttonClicked.setText(String.valueOf(currentPlayer));
+            buttonClicked.setEnabled(false);
+            if (checkForWin()) {
+                statusLabel.setText("Player " + currentPlayer + " wins!");
+                disableButtons();
+                JOptionPane.showMessageDialog(this, "Player " + currentPlayer + " wins!");
+            } else if (isBoardFull()) {
+                statusLabel.setText("It's a draw!");
+                JOptionPane.showMessageDialog(this, "It's a draw!");
+            } else {
+                currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+                statusLabel.setText("Player " + currentPlayer + "'s turn");
+            }
+        }
+    }
+
+    private boolean checkForWin() {
+        int[][] winConditions = {
+            {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // Rows
+            {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // Columns
+            {0, 4, 8}, {2, 4, 6}             // Diagonals
+        };
+
+        for (int[] condition : winConditions) {
+            if (buttons[condition[0]].getText().equals(String.valueOf(currentPlayer)) &&
+                buttons[condition[1]].getText().equals(String.valueOf(currentPlayer)) &&
+                buttons[condition[2]].getText().equals(String.valueOf(currentPlayer))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isBoardFull() {
+        for (JButton button : buttons) {
+            if (button.getText().equals("")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void disableButtons() {
+        for (JButton button : buttons) {
+            button.setEnabled(false);
+        }
+    }
+
+    private void resetGame() {
+        currentPlayer = 'X';
+        statusLabel.setText("Player X's turn");
+        for (JButton button : buttons) {
+            button.setText("");
+            button.setEnabled(true);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(TicTacToe::new);
+    }
+}
